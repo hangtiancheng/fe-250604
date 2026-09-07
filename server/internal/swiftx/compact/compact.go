@@ -535,12 +535,19 @@ func autoCompact(
 	prefix := messages[:keepStart]
 	keep := messages[keepStart:]
 
-	// Invoke the LLM to produce the summary, with PTL retry: if the summary
-	// request itself exceeds the context window, drop the oldest API rounds
-	// and retry, up to maxPTLRetries times.
-	finalSummary, err := callSummaryWithPTLRetry(ctx, client, prefix, toolSchemas)
+	// Cache-sharing 摘要：保留原始消息不动，在末尾追加摘要指令。
+	// API 调用的消息前缀和主对话上一次调用一致，命中 Prompt Cache，
+	// 只有末尾那条摘要指令按全价处理。PTL 时降级到文本序列化 + 截断重试。
+	finalSummary, err := callSummaryWithCacheSharing(ctx, client, messages, toolSchemas)
 	if err != nil {
-		return "", err
+		var ptlErr *llm.ContextTooLongError
+		if !errors.As(err, &ptlErr) {
+			return "", err
+		}
+		finalSummary, err = callSummaryWithPTLRetry(ctx, client, prefix, toolSchemas)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	// Persist a compact_boundary record so a later resume can rebuild this
@@ -578,6 +585,50 @@ func autoCompact(
 	*conv = *compacted
 	afterTokens := EstimateTokens(conv.GetMessages())
 	return fmt.Sprintf("Compacted: %d → %d estimated tokens", beforeTokens, afterTokens), nil
+}
+
+
+// callSummaryWithCacheSharing 保留原始消息列表不做序列化，在末尾追加摘要
+// 指令作为一条 user message 发给 LLM。消息前缀和主对话上一次 API 调用一致，
+// 能命中 Prompt Cache（Anthropic 90% 折扣、OpenAI 50% 折扣、DeepSeek ~90% 折扣）。
+func callSummaryWithCacheSharing(
+	ctx context.Context,
+	client llm.Client,
+	messages []conversation.Message,
+	toolSchemas []map[string]any,
+) (string, error) {
+	// 找到最后一条 assistant 消息，确保追加 user message 后消息序列合法
+	lastAssistant := -1
+	for i := len(messages) - 1; i >= 0; i-- {
+		if messages[i].Role == "assistant" {
+			lastAssistant = i
+			break
+		}
+	}
+	if lastAssistant < 0 {
+		return "", fmt.Errorf("no assistant message found for cache-sharing compact")
+	}
+
+	summaryConv := conversation.NewManager()
+	summaryConv.AppendMessages(messages[:lastAssistant+1])
+	summaryConv.AddUserMessage(summarySystemPrompt)
+
+	events, errs := client.Stream(ctx, summaryConv, toolSchemas)
+	var summary strings.Builder
+	for ev := range events {
+		if td, ok := ev.(llm.TextDelta); ok {
+			summary.WriteString(td.Text)
+		}
+	}
+	var streamErr error
+	select {
+	case streamErr = <-errs:
+	default:
+	}
+	if streamErr != nil {
+		return "", streamErr
+	}
+	return formatCompactSummary(summary.String()), nil
 }
 
 // callSummaryWithPTLRetry sends the prefix to the LLM for summarization. If

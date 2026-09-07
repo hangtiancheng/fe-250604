@@ -37,6 +37,7 @@ import (
 type stubSummaryClient struct {
 	summary      string
 	lastPrompt   string
+	allMessages  []conversation.Message
 	streamCalled bool
 }
 
@@ -44,7 +45,9 @@ func (c *stubSummaryClient) SetSystemPrompt(prompt string) {}
 
 func (c *stubSummaryClient) Stream(ctx context.Context, conv *conversation.Manager, tools []map[string]any) (<-chan llm.StreamEvent, <-chan error) {
 	c.streamCalled = true
-	if msgs := conv.GetMessages(); len(msgs) > 0 {
+	msgs := conv.GetMessages()
+	c.allMessages = msgs
+	if len(msgs) > 0 {
 		c.lastPrompt = msgs[len(msgs)-1].Content
 	}
 	ch := make(chan llm.StreamEvent, 4)
@@ -344,14 +347,14 @@ func TestAutoCompactNoSessionNoBoundary(t *testing.T) {
 
 // autoCompact must summarize only messages[:keepStart]; the kept tail must NOT
 // appear in the prompt handed to the summarizer.
-func TestAutoCompactSummaryOnlyCoversPrefix(t *testing.T) {
+func TestAutoCompactCacheSharingUsesOriginalMessages(t *testing.T) {
 	conv := conversation.NewManager()
-	for range 6 {
-		conv.AddUserMessage("PREFIX-ONLY-CONTENT " + bigMsg(3000))
-		conv.AddAssistantMessage("PREFIX-ONLY-REPLY " + bigMsg(3000))
+	for i := 0; i < 6; i++ {
+		conv.AddUserMessage("PREFIX-CONTENT " + bigMsg(3000))
+		conv.AddAssistantMessage("PREFIX-REPLY " + bigMsg(3000))
 	}
-	conv.AddUserMessage("TAIL-ONLY-MARKER")
-	conv.AddAssistantMessage("TAIL-ONLY-REPLY")
+	conv.AddUserMessage("RECENT-MARKER")
+	conv.AddAssistantMessage("RECENT-REPLY")
 
 	client := &stubSummaryClient{summary: "S"}
 	if _, err := autoCompact(context.Background(), conv, client, "", "", 200000, nil, nil); err != nil {
@@ -360,11 +363,19 @@ func TestAutoCompactSummaryOnlyCoversPrefix(t *testing.T) {
 	if !client.streamCalled {
 		t.Fatalf("summarizer was never called")
 	}
-	if strings.Contains(client.lastPrompt, "TAIL-ONLY-MARKER") {
-		t.Errorf("summary prompt must not include the kept tail, but it did")
+	// Cache-sharing 路径下，摘要调用复用原始消息（不序列化成文本），
+	// 最后一条消息是摘要指令
+	lastMsg := client.allMessages[len(client.allMessages)-1]
+	if !strings.Contains(lastMsg.Content, "summary") {
+		t.Errorf("last message should be the summary prompt, got: %s", lastMsg.Content[:100])
 	}
-	if !strings.Contains(client.lastPrompt, "PREFIX-ONLY-CONTENT") {
-		t.Errorf("summary prompt must include the summarized prefix, but it did not")
+	// 消息列表应包含 prefix 内容（cache-sharing 的核心：原始消息不动）
+	allContent := ""
+	for _, m := range client.allMessages {
+		allContent += m.Content + " "
+	}
+	if !strings.Contains(allContent, "PREFIX-CONTENT") {
+		t.Errorf("summary messages must include prefix content for cache sharing")
 	}
 }
 

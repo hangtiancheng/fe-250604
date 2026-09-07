@@ -164,6 +164,21 @@ func (h *History) Rewind(snapshotIndex int) ([]string, error) {
 		}
 	}
 
+	// target 之后才第一次被追踪的文件，target.Backups 里没有它们的记录，
+	// 上面这段循环碰不到：在 target 那个时间点它们还不存在，回滚到那个点
+	// 就该删掉，不能留在磁盘上。
+	for path := range h.trackedFiles {
+		if _, ok := target.Backups[path]; ok {
+			continue
+		}
+		if _, statErr := os.Stat(path); statErr == nil {
+			if rmErr := os.Remove(path); rmErr == nil {
+				changed = append(changed, path)
+			}
+		}
+		delete(h.trackedFiles, path)
+	}
+
 	// Truncate snapshots: remove everything after the target
 	h.snapshots = h.snapshots[:snapshotIndex+1]
 
