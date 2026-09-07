@@ -125,6 +125,10 @@ func TestCatalogNeedsReload(t *testing.T) {
 }
 
 func TestLoadCatalogNoBuiltins(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+
 	cat := LoadCatalog(t.TempDir())
 	if len(cat.List()) != 0 {
 		t.Errorf("expected empty catalog with no disk skills, got %d", len(cat.List()))

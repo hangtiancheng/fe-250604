@@ -236,7 +236,7 @@ func TestCoordinatorWiringIsSameAcrossEntrypoints(t *testing.T) {
 	roots := map[string]string{
 		"tui":    "../tui/tui.go",
 		"remote": "../remote/server.go",
-		"print":  "../../cmd/swiftx/print.go",
+		"print":  "../../../cmd/swiftx/print.go",
 	}
 	// Assembly fragments that must appear in every entry point.
 	required := []string{

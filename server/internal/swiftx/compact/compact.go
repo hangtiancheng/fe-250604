@@ -587,7 +587,6 @@ func autoCompact(
 	return fmt.Sprintf("Compacted: %d → %d estimated tokens", beforeTokens, afterTokens), nil
 }
 
-
 // callSummaryWithCacheSharing 保留原始消息列表不做序列化，在末尾追加摘要
 // 指令作为一条 user message 发给 LLM。消息前缀和主对话上一次 API 调用一致，
 // 能命中 Prompt Cache（Anthropic 90% 折扣、OpenAI 50% 折扣、DeepSeek ~90% 折扣）。
