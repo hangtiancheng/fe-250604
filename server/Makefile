@@ -10,9 +10,5 @@ build: ## Build both binaries into ./tmp
 	go build -o ./tmp/main ./cmd
 	go build -o ./tmp/swifty ./cmd/swifty
 
-sync:
-	rm -rf ~/.swifty
-	cp -r ~/.swifty ~/.swifty
-
 remote:
 	node ./internal/swifty/remote/fe/index.js
