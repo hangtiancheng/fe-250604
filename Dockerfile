@@ -59,9 +59,9 @@ COPY server/ ./
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/swifty-chat-server ./cmd
 
 # ---------------------------------------------------------------------------
-# Runtime target "server": the API + websocket + Swiftx agent host.
+# Runtime target "server": the API + websocket + Swifty agent host.
 # bash/git/curl are for the agent's Bash tool, which runs shell commands
-# inside per-user workspaces under /app/.swiftx/chat.
+# inside per-user workspaces under /app/.swifty/chat.
 # ---------------------------------------------------------------------------
 FROM alpine:3.21 AS server
 RUN apk add --no-cache bash git curl ca-certificates tzdata
@@ -69,8 +69,8 @@ WORKDIR /app
 
 COPY --from=server-builder /out/swifty-chat-server /usr/local/bin/swifty-chat-server
 
-# config.json (chat server) is bind-mounted by compose; the Swiftx provider
-# config is read from $HOME/.swiftx/config.yaml, also bind-mounted.
+# config.json (chat server) is bind-mounted by compose; the Swifty provider
+# config is read from $HOME/.swifty/config.yaml, also bind-mounted.
 EXPOSE 8000
 CMD ["swifty-chat-server"]
 

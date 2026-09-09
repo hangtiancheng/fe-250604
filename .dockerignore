@@ -9,11 +9,11 @@
 .playwright-cli
 .qoder
 .swifty
-.swiftx
+.swifty
 Dockerfile
 dist
 docker-compose.yml
-docker/swiftx.config.yaml
+docker/swifty.config.yaml
 docs
 logs
 node_modules

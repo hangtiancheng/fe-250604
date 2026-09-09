@@ -1,18 +1,18 @@
-.PHONY: dev swiftx build
+.PHONY: dev swifty build
 
 dev: ## Hot-reload the chat server with air
 	air -c .air.toml
 
-swiftx: ## Run the swiftx TUI
-	go run ./cmd/swiftx
+swifty: ## Run the swifty TUI
+	go run ./cmd/swifty
 
 build: ## Build both binaries into ./tmp
 	go build -o ./tmp/main ./cmd
-	go build -o ./tmp/swiftx ./cmd/swiftx
+	go build -o ./tmp/swifty ./cmd/swifty
 
 sync:
-	rm -rf ~/.swiftx
-	cp -r ~/.swifty ~/.swiftx
+	rm -rf ~/.swifty
+	cp -r ~/.swifty ~/.swifty
 
 remote:
-	node ./internal/swiftx/remote/fe/index.js
+	node ./internal/swifty/remote/fe/index.js

@@ -28,15 +28,11 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { groupSessionsQuery, userSessionsQuery } from "@/service/queries";
-import { isSwiftx, MessageType, type ChatSession } from "@/service/schemas";
+import { isSwifty, MessageType, type ChatSession } from "@/service/schemas";
 import useAuthStore from "@/store/auth";
 import { formatSessionTime } from "@/utils/format";
 
@@ -83,9 +79,7 @@ function SessionRow({ session, active, onSelect }: SessionRowProps) {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-baseline justify-between gap-2">
           <span className="text-foreground flex min-w-0 items-center gap-1 text-sm font-medium">
-            {isSwiftx(session.id) && (
-              <Bot className="text-primary size-3.5 shrink-0" />
-            )}
+            {isSwifty(session.id) && <Bot className="text-primary size-3.5 shrink-0" />}
             <span className="truncate">{session.name}</span>
           </span>
           <span className="text-muted-foreground shrink-0 text-[10px] tabular-nums">
@@ -150,9 +144,7 @@ function SessionSection({
 
       <CollapsibleContent className="overflow-hidden">
         {isLoading ? (
-          <p className="text-muted-foreground animate-pulse px-3 py-3 text-xs">
-            Loading sessions…
-          </p>
+          <p className="text-muted-foreground animate-pulse px-3 py-3 text-xs">Loading sessions…</p>
         ) : sessions.length === 0 ? (
           <p className="text-muted-foreground px-3 py-3 text-xs">
             {filtered ? "No matches found" : "No sessions yet"}
@@ -193,9 +185,7 @@ export function SessionSidebar() {
   const needle = query.trim().toLowerCase();
   const matching = (sessions: ChatSession[] | undefined) => {
     const rows = sessions ?? [];
-    return needle
-      ? rows.filter((row) => row.name.toLowerCase().includes(needle))
-      : rows;
+    return needle ? rows.filter((row) => row.name.toLowerCase().includes(needle)) : rows;
   };
 
   const openChat = (id: string) => navigate(`/chat/${id}`);

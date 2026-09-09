@@ -194,12 +194,12 @@ server/config.json
 
 .swifty
 **/.swifty
-.swiftx
-**/.swiftx
+.swifty
+**/.swifty
 .playwright-cli
 **/.playwright-cli
 
 server/static
 
-# Dockerized Swiftx provider config carries real API keys.
-docker/swiftx.config.yaml
+# Dockerized Swifty provider config carries real API keys.
+docker/swifty.config.yaml

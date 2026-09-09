@@ -28,7 +28,7 @@ import (
 	"github.com/hangtiancheng/swifty.go/swifty_http"
 )
 
-// AgentWs carries Swiftx's progress for one client: streaming text, thinking,
+// AgentWs carries Swifty's progress for one client: streaming text, thinking,
 // tool calls, and the permission and question prompts a run blocks on. Prompts
 // themselves travel the ordinary chat socket, so nothing here can put words in
 // the transcript.

@@ -33,10 +33,7 @@ import { GroupMembersDialog } from "@/components/group-members-dialog";
 import { GroupRequestsDialog } from "@/components/group-requests-dialog";
 import { GroupSettingsDialog } from "@/components/group-settings-dialog";
 import { MessageBubble } from "@/components/message-bubble";
-import {
-  MessageComposer,
-  type ComposerPayload,
-} from "@/components/message-composer";
+import { MessageComposer, type ComposerPayload } from "@/components/message-composer";
 import { SessionSidebar } from "@/components/session-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -46,21 +43,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { contact, group, session } from "@/service/api";
 import { errorMessage } from "@/service/http";
-import {
-  contactInfoQuery,
-  keys,
-  messagesQuery,
-  openSessionQuery,
-} from "@/service/queries";
+import { contactInfoQuery, keys, messagesQuery, openSessionQuery } from "@/service/queries";
 import type { AgentItem } from "@/service/agent-schemas";
-import { isGroupId, isSwiftx } from "@/service/schemas";
+import { isGroupId, isSwifty } from "@/service/schemas";
 import useAgentStore from "@/store/agent";
 import useAuthStore from "@/store/auth";
 import useCallStore from "@/store/call";
@@ -91,10 +79,8 @@ export default function Chat() {
   const messages = useQuery(messagesQuery(userId, id));
 
   const isGroup = isGroupId(id);
-  const isAssistant = isSwiftx(id);
-  const isOwner = Boolean(
-    contactInfo.data && contactInfo.data.contact_owner_id === userId,
-  );
+  const isAssistant = isSwifty(id);
+  const isOwner = Boolean(contactInfo.data && contactInfo.data.contact_owner_id === userId);
 
   const agentStatus = useAgentStore((state) => state.status);
   const agentItems = useAgentStore((state) => state.items);
@@ -118,11 +104,7 @@ export default function Chat() {
   const trailingOverlay: AgentItem[] = [];
   if (isAssistant) {
     for (const item of agentItems) {
-      if (
-        item.kind === "stream" &&
-        item.messageId &&
-        storedUuids.has(item.messageId)
-      ) {
+      if (item.kind === "stream" && item.messageId && storedUuids.has(item.messageId)) {
         continue;
       }
       const bucket = storedUuids.has(item.anchorId)
@@ -142,8 +124,7 @@ export default function Chat() {
 
   const { mutate: markAsRead } = useMutation({
     mutationFn: () => session.markRead(userId, id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: keys.sessions.all }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.sessions.all }),
   });
 
   // Clearing the badge waits for the transcript, so it happens once per open.
@@ -270,25 +251,16 @@ export default function Chat() {
                 </DropdownMenuItem>
 
                 {isGroup && (
-                  <DropdownMenuItem
-                    className="text-sm"
-                    onClick={() => setDialog("members")}
-                  >
+                  <DropdownMenuItem className="text-sm" onClick={() => setDialog("members")}>
                     Members
                   </DropdownMenuItem>
                 )}
                 {isGroup && isOwner && (
                   <>
-                    <DropdownMenuItem
-                      className="text-sm"
-                      onClick={() => setDialog("settings")}
-                    >
+                    <DropdownMenuItem className="text-sm" onClick={() => setDialog("settings")}>
                       Edit Group
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-sm"
-                      onClick={() => setDialog("requests")}
-                    >
+                    <DropdownMenuItem className="text-sm" onClick={() => setDialog("requests")}>
                       Join Requests
                     </DropdownMenuItem>
                   </>
@@ -299,8 +271,7 @@ export default function Chat() {
                     className="text-sm"
                     onClick={() =>
                       leaveConversation.mutate({
-                        run: () =>
-                          session.remove(userId, openSession.data ?? ""),
+                        run: () => session.remove(userId, openSession.data ?? ""),
                         message: "Session deleted",
                         staleKey: keys.sessions.all,
                       })
@@ -410,7 +381,7 @@ export default function Chat() {
             streaming={agentStreaming}
             onStop={useAgentStore.getState().stop}
             allowAttachments={false}
-            placeholder="Ask Swiftx — markdown supported, / for commands"
+            placeholder="Ask Swifty — markdown supported, / for commands"
           />
         ) : (
           <MessageComposer disabled={!contactInfo.data} onSend={sendMessage} />

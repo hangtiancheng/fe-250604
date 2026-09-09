@@ -40,7 +40,7 @@ func main() {
 	dao.InitMongo()
 	dao.InitIndexes()
 	dao.InitCache()
-	service.EnsureSwiftxUser(context.Background())
+	service.EnsureSwiftyUser(context.Background())
 	service.InitAgentHub()
 
 	go service.ChatServer.Start()

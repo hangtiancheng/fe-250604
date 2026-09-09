@@ -22,7 +22,7 @@ Built on a React 19 + Vite frontend and a Go backend on top of the
 
 Swifty Chat is a full-stack instant-messaging server and web client. It covers
 the core IM feature set — accounts, contacts, groups, sessions, rich messages
-and WebRTC calls — and goes one step further by hosting **Swiftx**, an AI coding
+and WebRTC calls — and goes one step further by hosting **Swifty**, an AI coding
 agent, as a first-class chat participant. Every signed-in user gets their own
 isolated agent workspace, streamed live into the conversation.
 
@@ -34,7 +34,7 @@ isolated agent workspace, streamed live into the conversation.
        │ /agent/ws                  └─────────┬──────────┘
        V                                      │ spawns
 ┌──────────────┐                    ┌─────────V──────────┐
-│  Agent UI    │ <────────────────> │  Swiftx Agent Hub  │
+│  Agent UI    │ <────────────────> │  Swifty Agent Hub  │
 │ streaming    │   token / tools    │  1 agent per user  │
 └──────────────┘                    └────────────────────┘
 ```
@@ -65,10 +65,10 @@ isolated agent workspace, streamed live into the conversation.
 - **Chunked file uploads** with instant upload (dedup by hash) and resume:
   `/file/verify` → `/file/upload-chunk` → `/file/merge` (chunks ≤ 10 MiB).
 
-### AI Agent (Swiftx)
+### AI Agent (Swifty)
 
 - **One private agent per user**, living in an isolated workspace under
-  `.swiftx/chat/<uid>`.
+  `.swifty/chat/<uid>`.
 - Live streaming of token deltas, thinking, tool calls and permission prompts
   over a dedicated `/agent/ws` socket; finalized replies are written back into
   the chat transcript so they survive reloads and show up in session previews.
@@ -90,7 +90,7 @@ isolated agent workspace, streamed live into the conversation.
 | Frontend  | React 19, Vite 8, TypeScript, Tailwind CSS v4, shadcn/ui, Zustand, TanStack Query/Form/Virtual, TipTap, Streamdown                                              |
 | Backend   | Go 1.26, [`swifty_http`](https://github.com/hangtiancheng/swifty.go) (HTTP + WebSocket), `swifty_orm` (MongoDB), `swifty_cache` (in-process read-through cache) |
 | Storage   | MongoDB 7                                                                                                                                                       |
-| Agent     | Swiftx (Go, Bubble Tea TUI / WebSocket remote mode)                                                                                                             |
+| Agent     | Swifty (Go, Bubble Tea TUI / WebSocket remote mode)                                                                                                             |
 | Packaging | Docker (multi-stage), nginx, PWA                                                                                                                                |
 
 ## Getting Started
@@ -121,8 +121,8 @@ The compose file builds a multi-stage image and runs three services — `mongo`,
 `server` and `web` (nginx serving the SPA):
 
 ```bash
-# Swiftx agent provider config (required by the server container)
-cp docker/swiftx.config.example.yaml docker/swiftx.config.yaml
+# Swifty agent provider config (required by the server container)
+cp docker/swifty.config.example.yaml docker/swifty.config.yaml
 
 # Point the web bundle at wherever the browser can reach the server
 VITE_API_URL=http://localhost:8000 docker compose up --build
@@ -130,7 +130,7 @@ VITE_API_URL=http://localhost:8000 docker compose up --build
 
 | Service  | Port (default)         | Notes                                                |
 | -------- | ---------------------- | ---------------------------------------------------- |
-| `server` | `8000` (`SERVER_PORT`) | API + WebSocket + Swiftx agent host                  |
+| `server` | `8000` (`SERVER_PORT`) | API + WebSocket + Swifty agent host                  |
 | `web`    | `8081` (`WEB_PORT`)    | nginx serving the built SPA                          |
 | `mongo`  | internal               | MongoDB 7, data persisted in the `mongo-data` volume |
 
@@ -183,7 +183,7 @@ WebSocket channels (all `GET`):
 | Channel         | Purpose                                                    |
 | --------------- | ---------------------------------------------------------- |
 | `/wss`          | Main realtime channel — messages, presence, call signaling |
-| `/agent/ws`     | Swiftx agent streaming (tokens, tools, permission prompts) |
+| `/agent/ws`     | Swifty agent streaming (tokens, tools, permission prompts) |
 | `/dashboard/ws` | Live cache dashboard stats                                 |
 
 ## Project Structure
@@ -197,16 +197,16 @@ swifty-chat/
 │   ├── service/             # HTTP client, schemas, queries, chunked upload
 │   └── workers/             # file-hash web worker (instant-upload dedup)
 ├── server/                  # Go backend
-│   ├── cmd/                 # main.go (chat server), swiftx/ (terminal agent)
+│   ├── cmd/                 # main.go (chat server), swifty/ (terminal agent)
 │   └── internal/
 │       ├── router/          # Route table
 │       ├── handler/         # HTTP + WebSocket handlers
 │       ├── service/         # Business logic + ChatServer + AgentHub wiring
-│       ├── agent_hub/       # Per-user Swiftx agent host & protocol
+│       ├── agent_hub/       # Per-user Swifty agent host & protocol
 │       ├── dao/             # MongoDB access, cache, indexes, transactions
 │       ├── model/           # Data models
-│       └── swiftx/          # Swiftx agent engine (tools, mcp, compact, …)
-├── docker/                  # nginx conf, docker configs, swiftx config example
+│       └── swifty/          # Swifty agent engine (tools, mcp, compact, …)
+├── docker/                  # nginx conf, docker configs, swifty config example
 ├── Dockerfile               # Multi-stage: web-builder → server-builder → server / web
 └── docker-compose.yml       # mongo + server + web
 ```
@@ -244,7 +244,7 @@ Backend (`server/`):
 
 ```bash
 make dev          # hot-reload the chat server with air
-make swiftx       # run the Swiftx TUI
+make swifty       # run the Swifty TUI
 make build        # build both binaries into ./tmp
 ```
 

@@ -32,7 +32,7 @@ const RESULT_LABEL = {
   deny: "Denied",
 } as const;
 
-/** Swiftx blocks on this card: the tool call does not proceed until an answer
+/** Swifty blocks on this card: the tool call does not proceed until an answer
  * goes back, so the choices stay visible until one is picked. */
 export function AgentPermissionCard({ item }: { item: AgentPermissionItem }) {
   const respondPermission = useAgentStore((state) => state.respondPermission);

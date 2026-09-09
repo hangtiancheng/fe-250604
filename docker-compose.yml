@@ -49,13 +49,13 @@ services:
     volumes:
       # Chat server config (port, mongo, jwt secret, static paths).
       - ./docker/config.docker.json:/app/config.json:ro
-      # Swiftx agent providers + permission mode. Create it first:
-      #   cp docker/swiftx.config.example.yaml docker/swiftx.config.yaml
-      - ./docker/swiftx.config.yaml:/root/.swiftx/config.yaml:ro
+      # Swifty agent providers + permission mode. Create it first:
+      #   cp docker/swifty.config.example.yaml docker/swifty.config.yaml
+      - ./docker/swifty.config.yaml:/root/.swifty/config.yaml:ro
       # Uploaded avatars / files / chunks.
       - static-data:/app/static
-      # Per-user agent workspaces, transcripts and skills (.swiftx/chat/<uid>).
-      - swiftx-data:/app/.swiftx
+      # Per-user agent workspaces, transcripts and skills (.swifty/chat/<uid>).
+      - swifty-data:/app/.swifty
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8000"]
       interval: 10s
@@ -82,4 +82,4 @@ services:
 volumes:
   mongo-data:
   static-data:
-  swiftx-data:
+  swifty-data:

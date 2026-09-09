@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// Package agent_hub runs one private swiftx agent per chat user and streams its
+// Package agent_hub runs one private swifty agent per chat user and streams its
 // progress to the browser over a dedicated websocket.
 //
 // Prompts do not arrive here directly: they travel the normal chat pipeline, so

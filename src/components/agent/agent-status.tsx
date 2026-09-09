@@ -20,11 +20,7 @@
  * SOFTWARE.
  */
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import useAgentStore from "@/store/agent";
 import { formatTokens } from "@/utils/format";
@@ -38,9 +34,9 @@ const DOT_CLASS = {
 
 const DOT_LABEL = {
   idle: "Assistant offline",
-  connecting: "Connecting to Swiftx…",
-  connected: "Swiftx connected",
-  reconnecting: "Reconnecting to Swiftx…",
+  connecting: "Connecting to Swifty…",
+  connected: "Swifty connected",
+  reconnecting: "Reconnecting to Swifty…",
 } as const;
 
 /** Header strip for the assistant thread: link health, model and token spend. */
@@ -55,7 +51,7 @@ export function AgentStatus() {
   // healthy dot the agent cannot live up to yet.
   const warming = status === "connected" && !ready;
   const dotClass = warming ? "bg-amber-500 animate-pulse" : DOT_CLASS[status];
-  const label = warming ? "Swiftx is starting up…" : DOT_LABEL[status];
+  const label = warming ? "Swifty is starting up…" : DOT_LABEL[status];
 
   return (
     <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -67,12 +63,7 @@ export function AgentStatus() {
       {model && <span className="hidden font-mono sm:inline">{model}</span>}
       <Tooltip>
         <TooltipTrigger
-          render={
-            <span
-              aria-label={label}
-              className={cn("size-2 rounded-full", dotClass)}
-            />
-          }
+          render={<span aria-label={label} className={cn("size-2 rounded-full", dotClass)} />}
         />
         <TooltipContent side="bottom">{label}</TooltipContent>
       </Tooltip>

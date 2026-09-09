@@ -25,11 +25,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/commands"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/permissions"
-	swiftx_session "github.com/hangtiancheng/swifty-chat/server/internal/swiftx/session"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/skills"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/teams"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/commands"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/permissions"
+	swifty_session "github.com/hangtiancheng/swifty-chat/server/internal/swifty/session"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/skills"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/teams"
 )
 
 func (s *Session) commandList() []CommandInfo {
@@ -44,7 +44,7 @@ func (s *Session) commandList() []CommandInfo {
 }
 
 // registerSkillCommand exposes one skill as a slash command, mirroring the
-// swiftx TUI wiring. Skills declared as fork-mode run inline here — the chat
+// swifty TUI wiring. Skills declared as fork-mode run inline here — the chat
 // session has no sub-agent host, the same fallback LoadSkillTool applies when
 // its ForkHost is nil. Idempotent: an already-taken name is left alone.
 func (s *Session) registerSkillCommand(name string) {
@@ -145,12 +145,12 @@ func (s *Session) handleUICommand(name, args string) {
 	switch name {
 	case "clear":
 		// Only the model's context is cleared. The transcript is the user's
-		// chat history with Swiftx and stays exactly where it is; the client
+		// chat history with Swifty and stays exactly where it is; the client
 		// marks the spot instead of wiping the thread.
 		s.conv.Reset()
 		s.ag.ClearActiveSkills()
 		s.ag.SetToolFilter(teams.CoordinatorToolFilter(s.appCfg.EnableCoordinatorMode))
-		s.sessionID = swiftx_session.NewID()
+		s.sessionID = swifty_session.NewID()
 		s.ag.SetSessionID(s.sessionID)
 		s.emit(Event{Type: "context_cleared"})
 
@@ -180,10 +180,10 @@ func (s *Session) handleUICommand(name, args string) {
 }
 
 // resumeSession points the agent's context at an earlier transcript. The chat
-// thread on screen is not rewritten: what changes is only what Swiftx
+// thread on screen is not rewritten: what changes is only what Swifty
 // remembers, which is why the confirmation says so explicitly.
 func (s *Session) resumeSession(args string) {
-	sessions := swiftx_session.ListSessions(s.workDir)
+	sessions := swifty_session.ListSessions(s.workDir)
 	if args == "" {
 		if len(sessions) == 0 {
 			s.emit(Event{Type: "system", Data: map[string]string{"message": "No earlier contexts found."}})
@@ -220,9 +220,9 @@ func (s *Session) resumeSession(args string) {
 		}})
 		return
 	}
-	message := fmt.Sprintf("Swiftx is now working from context %s (%d messages). Your chat history above is unchanged.", targetID, count)
+	message := fmt.Sprintf("Swifty is now working from context %s (%d messages). Your chat history above is unchanged.", targetID, count)
 	if compacted {
-		message = fmt.Sprintf("Swiftx is now working from compacted context %s (%d messages). Your chat history above is unchanged.", targetID, count)
+		message = fmt.Sprintf("Swifty is now working from compacted context %s (%d messages). Your chat history above is unchanged.", targetID, count)
 	}
 	s.emit(Event{Type: "system", Data: map[string]string{"message": message}})
 }

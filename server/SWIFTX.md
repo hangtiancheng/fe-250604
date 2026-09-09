@@ -1,4 +1,4 @@
-# Swiftx
+# Swifty
 
 An AI coding agent for your terminal, built in Go on top of [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 
@@ -12,7 +12,7 @@ An AI coding agent for your terminal, built in Go on top of [Bubble Tea](https:/
 Run the CLI directly from source:
 
 ```sh
-go run ./cmd/swiftx
+go run ./cmd/swifty
 ```
 
 Run the test suite:
@@ -31,22 +31,22 @@ Start from source (dev):
 
 ```sh
 # default address :18888
-go run ./cmd/swiftx --remote
+go run ./cmd/swifty --remote
 
 # custom address
-go run ./cmd/swiftx --remote :9000
+go run ./cmd/swifty --remote :9000
 ```
 
 Start from a packaged binary:
 
 ```sh
-go build -o build/swiftx ./cmd/swiftx
+go build -o build/swifty ./cmd/swifty
 
 # default address :18888
-./build/swiftx --remote
+./build/swifty --remote
 
 # custom address
-./build/swiftx --remote :9000
+./build/swifty --remote :9000
 ```
 
 Then open the printed URL (e.g. `http://localhost:18888`) in a browser.
@@ -56,7 +56,7 @@ Then open the printed URL (e.g. `http://localhost:18888`) in a browser.
 ### Build for the current platform
 
 ```sh
-go build -o build/swiftx ./cmd/swiftx
+go build -o build/swifty ./cmd/swifty
 ```
 
 ### Cross-platform compilation
@@ -71,22 +71,22 @@ release artifacts use the `x64` label (Node.js-style naming).
 
 ```sh
 # macOS (Apple Silicon)
-CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o build/swiftx-darwin-arm64 ./cmd/swiftx
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o build/swifty-darwin-arm64 ./cmd/swifty
 
 # macOS (Intel)
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o build/swiftx-darwin-x64 ./cmd/swiftx
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o build/swifty-darwin-x64 ./cmd/swifty
 
 # Linux (x86_64)
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o build/swiftx-linux-x64 ./cmd/swiftx
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o build/swifty-linux-x64 ./cmd/swifty
 
 # Linux (ARM64)
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o build/swiftx-linux-arm64 ./cmd/swiftx
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o build/swifty-linux-arm64 ./cmd/swifty
 
 # Windows (x86_64)
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o build/swiftx-windows-x64.exe ./cmd/swiftx
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o build/swifty-windows-x64.exe ./cmd/swifty
 
 # Windows (ARM64)
-CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o build/swiftx-windows-arm64.exe ./cmd/swiftx
+CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o build/swifty-windows-arm64.exe ./cmd/swifty
 ```
 
 ### Build all platforms at once
@@ -103,10 +103,10 @@ Example output:
 
 ```
 build/
-├── swiftx-darwin-arm64
-├── swiftx-darwin-x64
-├── swiftx-linux-arm64
-├── swiftx-linux-x64
-├── swiftx-windows-arm64.exe
-└── swiftx-windows-x64.exe
+├── swifty-darwin-arm64
+├── swifty-darwin-x64
+├── swifty-linux-arm64
+├── swifty-linux-x64
+├── swifty-windows-arm64.exe
+└── swifty-windows-x64.exe
 ```

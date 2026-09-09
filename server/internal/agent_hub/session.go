@@ -33,26 +33,26 @@ import (
 
 	"github.com/hangtiancheng/swifty.go/swifty_http"
 
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/agent"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/commands"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/compact"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/config"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/conversation"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/file_history"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/hooks"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/llm"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/mcp"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/memory"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/memory/extractor"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/permissions"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/plan_file"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/prompt"
-	swiftx_session "github.com/hangtiancheng/swifty-chat/server/internal/swiftx/session"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/skills"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/subagent"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/teams"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/todo"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/tools"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/agent"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/commands"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/compact"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/config"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/conversation"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/file_history"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/hooks"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/llm"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/mcp"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/memory"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/memory/extractor"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/permissions"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/plan_file"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/prompt"
+	swifty_session "github.com/hangtiancheng/swifty-chat/server/internal/swifty/session"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/skills"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/subagent"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/teams"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/todo"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/tools"
 )
 
 // promptQueueSize bounds how many turns may wait while one is running. Past
@@ -166,7 +166,7 @@ func newSession(mgr *Manager, userID, workDir string) (*Session, error) {
 	return s, nil
 }
 
-// initAgent mirrors the swiftx TUI's single-provider startup, scoped to this
+// initAgent mirrors the swifty TUI's single-provider startup, scoped to this
 // user's workspace. Everything derived from a working directory — skills,
 // instructions, memory, sessions, todos, the permission sandbox — therefore
 // stays inside that user's directory.
@@ -193,7 +193,7 @@ func (s *Session) initAgent() error {
 	}
 	s.client = client
 	s.conv = conversation.NewManager()
-	s.sessionID = swiftx_session.NewID()
+	s.sessionID = swifty_session.NewID()
 	s.fileHistory = file_history.New(wd, s.sessionID)
 	s.defaultTools.EditFile.FileHistory = s.fileHistory
 	s.defaultTools.WriteFile.FileHistory = s.fileHistory
@@ -208,7 +208,7 @@ func (s *Session) initAgent() error {
 	ag.SetSessionID(s.sessionID)
 
 	// The sandbox is the whole isolation story between chat users: only this
-	// user's workspace is reachable, and the shared ~/.swiftx memory is
+	// user's workspace is reachable, and the shared ~/.swifty memory is
 	// deliberately left out so one user cannot write what another one reads.
 	ag.Checker = permissions.NewChecker(
 		permissions.NewPathSandbox(wd, memory.GetAutoMemPath(wd)),
@@ -301,7 +301,7 @@ func (s *Session) registerTools(client llm.Client, p *config.ProviderConfig, wd 
 // survives an idle eviction or a server restart. The chat history the user sees
 // lives in MongoDB; this only rebuilds what the model remembers.
 func (s *Session) restoreLatestSession() {
-	sessions := swiftx_session.ListSessions(s.workDir)
+	sessions := swifty_session.ListSessions(s.workDir)
 	if len(sessions) == 0 {
 		return
 	}
@@ -312,7 +312,7 @@ func (s *Session) restoreLatestSession() {
 // adopts its id, so further turns append to the same file. It reports how many
 // messages were replayed and whether they came from a compacted checkpoint.
 func (s *Session) loadSessionContext(id string) (int, bool) {
-	msgs := swiftx_session.LoadSession(s.workDir, id)
+	msgs := swifty_session.LoadSession(s.workDir, id)
 	if len(msgs) == 0 {
 		return 0, false
 	}
@@ -323,16 +323,16 @@ func (s *Session) loadSessionContext(id string) (int, bool) {
 	s.defaultTools.EditFile.FileHistory = s.fileHistory
 	s.defaultTools.WriteFile.FileHistory = s.fileHistory
 
-	boundary, after, compacted := swiftx_session.FindLastCompactBoundary(msgs)
+	boundary, after, compacted := swifty_session.FindLastCompactBoundary(msgs)
 	replay := msgs
 	if compacted {
 		summary := "This session continues from a previous conversation that was compacted due to context size limits. Below is a summary of the earlier discussion:\n\n" + boundary.Summary
 		if len(boundary.Keep) > 0 {
 			summary += "\n\nRecent messages have been preserved as-is."
 		}
-		replay = []swiftx_session.Message{{Role: "user", Content: summary}}
+		replay = []swifty_session.Message{{Role: "user", Content: summary}}
 		for _, k := range boundary.Keep {
-			replay = append(replay, swiftx_session.Message{
+			replay = append(replay, swifty_session.Message{
 				Role: k.Role, Content: k.Content, ToolUses: k.ToolUses, ToolResults: k.ToolResults,
 			})
 		}
@@ -405,7 +405,7 @@ func (s *Session) enqueue(job promptJob) {
 	case s.queue <- job:
 	default:
 		s.emit(Event{Type: "system", Data: map[string]string{
-			"message": "Swiftx is still working through earlier messages — please wait for it to catch up.",
+			"message": "Swifty is still working through earlier messages — please wait for it to catch up.",
 		}})
 	}
 }
@@ -430,7 +430,7 @@ func (s *Session) handlePrompt(job promptJob) {
 // runTurn drives one agent loop. saveText is what the transcript records (for a
 // slash command that is the command itself); promptText is what the model sees.
 func (s *Session) runTurn(saveText, promptText string) {
-	swiftx_session.SaveMessage(s.workDir, s.sessionID, swiftx_session.Message{
+	swifty_session.SaveMessage(s.workDir, s.sessionID, swifty_session.Message{
 		Role: "user", Content: saveText, Ts: time.Now().Unix(),
 	})
 	s.conv.AddUserMessage(promptText)
@@ -860,7 +860,7 @@ func resolveMode(mode string) permissions.PermissionMode {
 func buildInstructions(wd string) string {
 	parts := []string{}
 	for _, p := range []string{
-		filepath.Join(wd, ".swiftx", "instructions.md"),
+		filepath.Join(wd, ".swifty", "instructions.md"),
 		filepath.Join(wd, "AGENTS.md"),
 	} {
 		if data, err := os.ReadFile(p); err == nil {
@@ -880,7 +880,7 @@ func buildSkillSection(catalog *skills.Catalog, wd string) string {
 	}
 	var sb strings.Builder
 	sb.WriteString("## Available Skills\n\n")
-	fmt.Fprintf(&sb, "Skills are installed at: %s\n", filepath.Join(wd, ".swiftx", "skills"))
+	fmt.Fprintf(&sb, "Skills are installed at: %s\n", filepath.Join(wd, ".swifty", "skills"))
 	sb.WriteString("When creating new skills, always place them under this directory as <skill-name>/SKILL.md.\n\n")
 	for _, meta := range metas {
 		desc := meta.Description
@@ -893,7 +893,7 @@ func buildSkillSection(catalog *skills.Catalog, wd string) string {
 }
 
 // installMemExtractor wires background memory extraction. UserMemoryDir is left
-// empty on purpose: ~/.swiftx/memory is shared by the whole process, so writing
+// empty on purpose: ~/.swifty/memory is shared by the whole process, so writing
 // there would leak one chat user's memories into every other user's agent.
 func installMemExtractor(ag *agent.Agent, wd, protocol string, client llm.Client, registry *tools.Registry, conv *conversation.Manager) *extractor.Extractor {
 	extr := extractor.InitExtractMemories(extractor.Deps{

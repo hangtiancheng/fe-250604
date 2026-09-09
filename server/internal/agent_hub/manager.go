@@ -34,9 +34,9 @@ import (
 
 	"github.com/hangtiancheng/swifty.go/swifty_http"
 
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/config"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/mcp"
-	"github.com/hangtiancheng/swifty-chat/server/internal/swiftx/tools"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/config"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/mcp"
+	"github.com/hangtiancheng/swifty-chat/server/internal/swifty/tools"
 )
 
 const (
@@ -62,8 +62,8 @@ const (
 )
 
 // Manager owns one agent per user, created on first contact and dropped once
-// idle. Configuration is swiftx's own: whatever the operator put in
-// ~/.swiftx/config.yaml or .swiftx/config.yaml applies here too, which is how
+// idle. Configuration is swifty's own: whatever the operator put in
+// ~/.swifty/config.yaml or .swifty/config.yaml applies here too, which is how
 // providers, MCP servers, hooks and the permission mode arrive without this
 // project defining a second set of knobs.
 type Manager struct {
@@ -98,14 +98,14 @@ func NewManager(sink ChatSink) *Manager {
 	}
 	m := &Manager{
 		sink:     sink,
-		root:     filepath.Join(wd, ".swiftx", "chat"),
+		root:     filepath.Join(wd, ".swifty", "chat"),
 		sessions: make(map[string]*Session),
 		done:     make(chan struct{}),
 	}
 	cfg, err := config.LoadConfig("")
 	switch {
 	case err != nil:
-		// A server without swiftx configured must still serve chat, so this is
+		// A server without swifty configured must still serve chat, so this is
 		// recorded and reported per conversation instead of failing startup.
 		m.cfgErr = err
 		log.Printf("agent_hub: assistant disabled: %v", err)
@@ -180,7 +180,7 @@ func (m *Manager) Serve(userID string, ws *swifty_http.WSConn) {
 // session returns the user's agent, building it on first use.
 func (m *Manager) session(userID string) (*Session, error) {
 	if m.cfgErr != nil {
-		return nil, fmt.Errorf("Swiftx is not configured on this server: %w", m.cfgErr)
+		return nil, fmt.Errorf("Swifty is not configured on this server: %w", m.cfgErr)
 	}
 	if !safeSegment(userID) {
 		return nil, fmt.Errorf("invalid user id")

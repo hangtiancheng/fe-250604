@@ -246,7 +246,7 @@ func (s *Server) handleMessage(in inbound) {
 	}
 
 	s.broadcast(req, msg, true)
-	dispatchToSwiftx(&msg)
+	dispatchToSwifty(&msg)
 }
 
 // handleAVMessage interprets audio/video signaling. Call lifecycle frames
@@ -320,8 +320,8 @@ func (s *Server) handleAVMessage(req ChatMessageRequest, msg model.Message) {
 // the callee(s). Failures are reported back to the caller as call_failed.
 func (s *Server) handleStartCall(req ChatMessageRequest, msg model.Message, roomId string) {
 	caller := msg.SendId
-	if IsSwiftx(msg.ReceiveId) {
-		s.sendCallFailed(caller, roomId, "Swiftx is a text-only assistant and cannot take calls")
+	if IsSwifty(msg.ReceiveId) {
+		s.sendCallFailed(caller, roomId, "Swifty is a text-only assistant and cannot take calls")
 		return
 	}
 	if Calls.IsBusy(caller) && !Calls.InRoom(roomId, caller) {

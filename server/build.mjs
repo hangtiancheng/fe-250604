@@ -22,9 +22,9 @@
  */
 
 /**
- * Release build script for the Swiftx CLI.
+ * Release build script for the Swifty CLI.
  *
- * Cross-compiles the `./cmd/swiftx` entrypoint for darwin, linux, and
+ * Cross-compiles the `./cmd/swifty` entrypoint for darwin, linux, and
  * windows (amd64 + arm64) and writes the resulting binaries to `./build`.
  *
  * Usage:
@@ -58,10 +58,10 @@ import { fileURLToPath } from "node:url";
  */
 
 /** Name of the produced binary. */
-const BINARY_NAME = "swiftx";
+const BINARY_NAME = "swifty";
 
 /** Go package to compile. */
-const ENTRYPOINT = "./cmd/swiftx";
+const ENTRYPOINT = "./cmd/swifty";
 
 /** Output directory, relative to the project root. */
 const OUTPUT_DIR = "build";
@@ -83,7 +83,7 @@ const TARGETS = [
  * Compute the output path for a target, relative to the project root.
  *
  * @param {Target} target - The compilation target.
- * @returns {string} Relative output path, e.g. `build/swiftx-linux-x64`.
+ * @returns {string} Relative output path, e.g. `build/swifty-linux-x64`.
  */
 function outputPath(target) {
   const ext = target.goos === "windows" ? ".exe" : "";
